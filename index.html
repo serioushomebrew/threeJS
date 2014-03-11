@@ -57,9 +57,6 @@
             document.getElementById('stage').appendChild(renderer.domElement);
 
             function render() {
-//                cube.rotation.x = (rotpos[0] / 1000);
-//                cube.rotation.y = (rotpos[1] / 1000);
-
                 camera.lookAt(cube.position);
 
                 renderer.render(scene, camera);
@@ -71,16 +68,16 @@
 
             window.addEventListener('mousedown', function(e) {
                 drag = true;
-                dragStart = [e.x, e.y];
+                dragStart = [e.y + (cube.rotation.x * 1000) , e.x + (cube.rotation.y * 1000)];
             });
             window.addEventListener('mouseup', function(e) {
                 drag = false;
             });
             window.addEventListener('mousemove', function(e) {
                 if(drag === true) {
-                    var diff = [dragStart[0] - e.x, dragStart[1] - e.y];
-                    cube.rotation.x = cube.rotation.x - (diff[1] / 10000);
-                    cube.rotation.y = cube.rotation.y - (diff[0] / 10000);
+                    var diff = [dragStart[0] - e.y, dragStart[1] - e.x];
+                    cube.rotation.x = (diff[0] / 1000);
+                    cube.rotation.y = (diff[1] / 1000);
                 }
             });
 

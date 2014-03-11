@@ -1,121 +1,89 @@
 <!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>Basic Three + WebGl</title>
-    <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
-    <script type="text/javascript" src="three.js"></script>
-    <script type="text/javascript" src="primitives.js"></script>
-</head>
-<body>
-<div id="container" width="400" height="300"></div>
-<script>
-    /**
-     * Created by Koen Hendriks.
-     * User: koen_hendriks
-     * Date: 10-3-14
-     * Time: 0:53
-     */
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>WebGL Demo</title>
+        <style type="text/css">
+            body, html { margin: 0; padding: 0; }
+            body { background-color: #000; }
+            div { width: 1000px; height: 500px; position: absolute; left: 50%; top: 50%; margin-left: -500px; margin-top: -250px; }
+        </style>
+    </head>
+    <body>
+        <div id="stage"></div>
 
-    var camera, scene, renderer;
-    var cube, pointLight, vector;
-    var mouseX, mouseY;
-    var click = false;
+        <script type="text/javascript" src="three.js"></script>
+        <script type="text/javascript" src="primitives.js"></script>
+        <script type="text/javascript">
+            var camera, scene, material, cube, renderer, light, rotpos, drag, dragStart, dragCurrent;
 
-    document.addEventListener('mousemove', function(e){
-        mouseX = e.pageX;
-        mouseY = e.pageY;
-    }, false);
+            // Initialize some vars
+            drag = false;
+            rotpos = [0, 0];
 
-    document.addEventListener('mousedown', function(e){
-        click = true;
-        e.preventDefault();
-        return false;
-    }, false);
+            // Create the camera and give it a z position to use
+            camera = new THREE.PerspectiveCamera(45, 1000 / 500, 1, 10000);
+            camera.position.z = 300;
 
-    document.addEventListener('mouseup', function(e){
-        click = false;
-        e.preventDefault();
-        return false;
-    }, false);
+            // Create a scene
+            scene = new THREE.Scene();
 
+            // Create a material
+            material = new THREE.MeshLambertMaterial({
+                color: 0xCC0000
+            });
 
-    init();
-    animate();
-
-
-    function init() {
-        /**
-         * Create a camera and give it a z position to use
-         */
-        camera = new THREE.PerspectiveCamera( 45, 1000 / 500, 1, 10000 );
-        camera.position.z = 1000;
-
-        //Create a scene
-        scene = new THREE.Scene();
-
-        //Create the (lambert) material for the cube
-        var cubeMaterial =
-                new THREE.MeshLambertMaterial(
-                        {
-                            color: 0xCC0000
-                        });
-
-        //Create the cube with the cubematerial
-        cube = new THREE.Mesh(
-
+            // Create a cube with the material
+            cube = new THREE.Mesh(
                 new THREE.CubeGeometry(100, 100, 100),
+                material);
 
-                cubeMaterial);
+            // Adds the cube to the scene
+            scene.add(cube);
 
-        // Add the cube to the scene
-        scene.add(cube);
+            // Render the webgl
+            renderer = new THREE.WebGLRenderer();
+            renderer.setSize(1000, 500);
 
-        //Create a new WebGL renderer
-        renderer = new THREE.WebGLRenderer();
-        renderer.setSize( 1000 , 500 );
+            // Create a point light
+            light = new THREE.PointLight(0xFFFFFF);
+            light.position.x = 200;
+            light.position.y = 200;
+            light.position.z = 1000;
 
-        // create a point light
-        pointLight =
-                new THREE.PointLight(0xFFFFFF);
+            // Add the light to the scene
+            scene.add(light);
 
-        // set its position
-                pointLight.position.x = 200;
-                pointLight.position.y = 200;
-                pointLight.position.z = 1000;
+            document.getElementById('stage').appendChild(renderer.domElement);
 
-        // add the light to the scene
-                scene.add(pointLight);
+            function render() {
+//                cube.rotation.x = (rotpos[0] / 1000);
+//                cube.rotation.y = (rotpos[1] / 1000);
 
-        //Create the WebGl canvas in the container element
-        document.getElementById('container').appendChild( renderer.domElement );
+                camera.lookAt(cube.position);
 
-    }
+                renderer.render(scene, camera);
 
-    function animate() {
+                requestAnimationFrame(render);
+            };
 
-        // note: three.js includes requestAnimationFrame shim
-        requestAnimationFrame( animate );
+            render();
 
-        //let's the camera look at the cube whenever its moved somehow
-        camera.lookAt(cube.position);
+            window.addEventListener('mousedown', function(e) {
+                drag = true;
+                dragStart = [e.x, e.y];
+            });
+            window.addEventListener('mouseup', function(e) {
+                drag = false;
+            });
+            window.addEventListener('mousemove', function(e) {
+                if(drag === true) {
+                    var diff = [dragStart[0] - e.x, dragStart[1] - e.y];
+                    cube.rotation.x = cube.rotation.x - (diff[1] / 10000);
+                    cube.rotation.y = cube.rotation.y - (diff[0] / 10000);
+                }
+            });
 
-        /**
-         * If the X value of the mouse is valid and the mouse click is true
-         * we change the rotation of the cube depending on the X and Y value of the mouse
-         */
-        if(mouseX != null && click == true)
-        {
-            cube.rotation.y = (mouseX / 200)
-            cube.rotation.x = (mouseY / 100)
-        }
-
-
-        //Render everything into the WebGl render every frame
-        renderer.render( scene, camera );
-
-    }
-
-</script>
-</body>
+        </script>
+    </body>
 </html>
